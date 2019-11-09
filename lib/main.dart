@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
 
-final DateFormat TIME_FORMAT = new DateFormat("H:m:s");
+const TIME_FORMAT_STRING = 'hh:mm:ss a';
+const DATE_FORMAT_STRING = 'EEEE, MMMM d, yyyy';
+
+final DateFormat timeFormatter = new DateFormat(TIME_FORMAT_STRING);
+final DateFormat dateFormatter = new DateFormat(DATE_FORMAT_STRING);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Dock Clock',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -23,9 +27,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Dock Clock'),
     );
   }
 }
@@ -49,7 +53,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   DateTime _time = new DateTime.now();
   Timer timer;
 
@@ -59,17 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
     timer = new Timer.periodic(Duration(seconds: 1), (Timer t) => setState((){
       _time = new DateTime.now();
     }));
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
   }
 
   @override
@@ -107,25 +99,17 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have clicked the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-            Text(
-               TIME_FORMAT.format(_time),
+                timeFormatter.format(_time),
               style: Theme.of(context).textTheme.headline
+            ),
+            Text(
+                dateFormatter.format(_time),
+                style: Theme.of(context).textTheme.subhead
             )
 
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
