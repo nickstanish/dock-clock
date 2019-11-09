@@ -1,6 +1,11 @@
+import 'dart:async';
+
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
+
+final DateFormat TIME_FORMAT = new DateFormat("H:m:s");
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -45,6 +50,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  DateTime _time = new DateTime.now();
+  Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = new Timer.periodic(Duration(seconds: 1), (Timer t) => setState((){
+      _time = new DateTime.now();
+    }));
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -98,6 +113,11 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.display1,
             ),
+            Text(
+               TIME_FORMAT.format(_time),
+              style: Theme.of(context).textTheme.headline
+            )
+
           ],
         ),
       ),
