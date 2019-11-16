@@ -63,6 +63,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+ // https://flutter.dev/docs/development/ui/animations/tutorial
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title, this.setNightMode}) : super(key: key);
@@ -74,9 +75,47 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+enum DisplayState {
+  AUTO,
+  NIGHT_MODE,
+  DAY_MODE
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   DateTime _time = new DateTime.now();
   Timer timer;
+  DisplayState displayState = DisplayState.AUTO;
+
+  void _updateTime() {
+    setState(() {
+      _time = new DateTime.now();
+    });
+  }
+
+  void dayModeHandler() {
+    widget.setNightMode(false);
+    Screen.setBrightness(DAY_BRIGHTNESS);
+  }
+
+  void nightModeHandler() {
+    widget.setNightMode(true);
+    Screen.setBrightness(NIGHT_BRIGHTNESS);
+  }
+
+  void _handleTick(Timer t) {
+    _updateTime();
+    if (displayState == DisplayState.AUTO) {
+      if (_time.hour < DAY_TIME[0] || _time.hour > DAY_TIME[1]) {
+        nightModeHandler();
+      } else {
+        dayModeHandler();
+      }
+    } else if (displayState == DisplayState.NIGHT_MODE) {
+      nightModeHandler();
+    } else if (displayState == DisplayState.DAY_MODE) {
+      dayModeHandler();
+    }
+  }
 
   @override
   void initState() {
@@ -84,17 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
     SystemChrome.setEnabledSystemUIOverlays([]);
     Screen.keepOn(true);
 
-    timer = new Timer.periodic(Duration(seconds: 1), (Timer t) => setState((){
-      _time = new DateTime.now();
-      if (_time.hour < DAY_TIME[0] || _time.hour > DAY_TIME[1]) {
-        widget.setNightMode(true);
-        Screen.setBrightness(NIGHT_BRIGHTNESS);
-      } else {
-        widget.setNightMode(false);
-        Screen.setBrightness(DAY_BRIGHTNESS);
-      }
-
-    }));
+    timer = new Timer.periodic(Duration(seconds: 1), _handleTick);
   }
 
   @override
@@ -106,50 +135,44 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return SafeArea(
-        child: Scaffold(
-          body: Center(
+        child: GestureDetector(
+          onDoubleTap: () {
+            int index = (DisplayState.values.indexOf(displayState) + 1) % DisplayState.values.length;
+            setState(() {
+              displayState = DisplayState.values[index];
+            });
+          },
+          child: Scaffold(
+            body: Center(
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
             child: Column(
-              // Column is also a layout widget. It takes a list of children and
-              // arranges them vertically. By default, it sizes itself to fit its
-              // children horizontally, and tries to be as tall as its parent.
-              //
-              // Invoke "debug painting" (press "p" in the console, choose the
-              // "Toggle Debug Paint" action from the Flutter Inspector in Android
-              // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-              // to see the wireframe for each widget.
-              //
-              // Column has various properties to control how it sizes itself and
-              // how it positions its children. Here we use mainAxisAlignment to
-              // center the children vertically; the main axis here is the vertical
-              // axis because Columns are vertical (the cross axis would be
-              // horizontal).
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                        timeFormatter.format(_time),
-                        style: Theme.of(context).textTheme.headline
-                    ),
-                    Padding(
-                        padding: EdgeInsets.fromLTRB(0.0, 13.0, 0.0, 2.0),
-                        child: Text(
-                            ampmFormatter.format(_time),
-                            style: Theme.of(context).textTheme.subtitle
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                            timeFormatter.format(_time),
+                            style: Theme.of(context).textTheme.headline
+                        ),
+                        Padding(
+                            padding: EdgeInsets.fromLTRB(0.0, 13.0, 0.0, 2.0),
+                            child: Text(
+                                ampmFormatter.format(_time),
+                                style: Theme.of(context).textTheme.subtitle
+                            )
                         )
-                    )
-                  ]
-                ),
-                Text(
-                    dateFormatter.format(_time),
-                    style: Theme.of(context).textTheme.subhead
-                )
-              ],
-            ),
+                      ]
+                  ),
+                  Text(
+                      dateFormatter.format(_time),
+                      style: Theme.of(context).textTheme.subhead
+                  )
+                ],
+              )
+            )
           ),
         )
     );
