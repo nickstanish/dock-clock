@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -6,46 +7,37 @@ import 'package:screen/screen.dart';
 
 void main() => runApp(MyApp());
 
-const TIME_FORMAT_STRING = 'hh:mm:ss a';
+//const TIME_FORMAT_WITH_SECONDS_STRING = 'hh:mm:ss a';
+const TIME_FORMAT_STRING = 'hh:mm';
+const AM_PM_FORMAT_STRING = 'a';
 const DATE_FORMAT_STRING = 'EEEE, MMMM d, yyyy';
 
 final DateFormat timeFormatter = new DateFormat(TIME_FORMAT_STRING);
+final DateFormat ampmFormatter = new DateFormat(AM_PM_FORMAT_STRING);
 final DateFormat dateFormatter = new DateFormat(DATE_FORMAT_STRING);
 
-const DAY_TIME = [8, 21];
+const DAY_TIME = [9, 21];
+const DAY_BRIGHTNESS = 1.0;
+const NIGHT_BRIGHTNESS = 0.0;
 
 // https://proandroiddev.com/how-to-dynamically-change-the-theme-in-flutter-698bd022d0f0
 final nightTheme = ThemeData(
-  // This is the theme of your application.
-  //
-  // Try running your application with "flutter run". You'll see the
-  // application has a blue toolbar. Then, without quitting the app, try
-  // changing the primarySwatch below to Colors.green and then invoke
-  // "hot reload" (press "r" in the console where you ran "flutter run",
-  // or simply save your changes to "hot reload" in a Flutter IDE).
-  // Notice that the counter didn't reset back to zero; the application
-  // is not restarted.
     primarySwatch: Colors.blueGrey,
     canvasColor: Colors.black,
     textTheme: TextTheme(
-        headline: TextStyle(color: Colors.white, fontSize: 80), subhead: TextStyle(color: Colors.white, fontSize: 20)
+        headline: TextStyle(color: Colors.white, fontSize: 92),
+        subhead: TextStyle(color: Colors.white, fontSize: 20),
+        subtitle: TextStyle(color: Colors.white, fontSize: 38)
     )
 );
 
 final dayTheme = ThemeData(
-  // This is the theme of your application.
-  //
-  // Try running your application with "flutter run". You'll see the
-  // application has a blue toolbar. Then, without quitting the app, try
-  // changing the primarySwatch below to Colors.green and then invoke
-  // "hot reload" (press "r" in the console where you ran "flutter run",
-  // or simply save your changes to "hot reload" in a Flutter IDE).
-  // Notice that the counter didn't reset back to zero; the application
-  // is not restarted.
     primarySwatch: Colors.blueGrey,
-    canvasColor: Colors.lightBlueAccent,
+    canvasColor: Color.fromRGBO(193, 246, 244, 1),
     textTheme: TextTheme(
-        headline: TextStyle(color: Colors.black, fontSize: 80), subhead: TextStyle(color: Colors.black, fontSize: 20)
+        headline: TextStyle(color: Colors.black, fontSize: 92),
+        subhead: TextStyle(color: Colors.black, fontSize: 20),
+        subtitle: TextStyle(color: Colors.black, fontSize: 38)
     )
 );
 
@@ -75,15 +67,6 @@ class _MyAppState extends State<MyApp> {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title, this.setNightMode}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
   final Function(bool) setNightMode;
 
@@ -98,11 +81,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIOverlays([]);
     Screen.keepOn(true);
-    Screen.setBrightness(0.1);
+
     timer = new Timer.periodic(Duration(seconds: 1), (Timer t) => setState((){
       _time = new DateTime.now();
-      widget.setNightMode(_time.hour < DAY_TIME[0] || _time.hour > DAY_TIME[1]);
+      if (_time.hour < DAY_TIME[0] || _time.hour > DAY_TIME[1]) {
+        widget.setNightMode(true);
+        Screen.setBrightness(NIGHT_BRIGHTNESS);
+      } else {
+        widget.setNightMode(false);
+        Screen.setBrightness(DAY_BRIGHTNESS);
+      }
+
     }));
   }
 
@@ -136,9 +127,22 @@ class _MyHomePageState extends State<MyHomePage> {
               // horizontal).
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                    timeFormatter.format(_time),
-                  style: Theme.of(context).textTheme.headline
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                        timeFormatter.format(_time),
+                        style: Theme.of(context).textTheme.headline
+                    ),
+                    Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 13.0, 0.0, 2.0),
+                        child: Text(
+                            ampmFormatter.format(_time),
+                            style: Theme.of(context).textTheme.subtitle
+                        )
+                    )
+                  ]
                 ),
                 Text(
                     dateFormatter.format(_time),
