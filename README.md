@@ -2,6 +2,9 @@
 
 Docked Clock Application
 
+![Screenshot Night Mode](./screenshots/night_mode.png)
+![Screenshot Day Mode](./screenshots/day_mode.png)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
