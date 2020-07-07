@@ -2,8 +2,8 @@
 
 Docked Clock Application
 
-![Screenshot Night Mode](./screenshots/night_mode.png)
-![Screenshot Day Mode](./screenshots/day_mode.png)
+<img align="center" width="50%" alt="Screenshot Night Mode" src="./screenshots/night_mode.png">
+<img align="center" width="50%" alt="Screenshot Day Mode" src="./screenshots/day_mode.png">
 
 ## Getting Started
 
